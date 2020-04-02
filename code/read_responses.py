@@ -1,9 +1,12 @@
 import pandas as pd
 import pathlib, os
 from pathlib import Path
+import matplotlib
 import matplotlib.pyplot as plt
 from stimuli import Stimuli, responses
+from matplotlib.cbook import get_sample_data
 import numpy as np
+import cv2
 
 CSV_PATH = pathlib.Path(
     "/Users/dumbeldore/Desktop/White_Noise_fMRI/labeling_exp/Stimuli labeling for fMRI task.csv"
@@ -70,11 +73,32 @@ class ResponseCsv:
     def generate_figures(self):
         for stim in self.stim_dict:
             df = self.stim_dict[stim]["transformed_responses"]
-            header = f"{stim}-{self.stim_dict[stim]['stimulus_path'].name}"
+            stim_path = self.stim_dict[stim]["stimulus_path"]
+            header = f"{stim}-{stim_path.name}"
             fig = self.generate_stim_figure(df)
+            fig = self.add_stimulus(fig, self.stim_dict[stim]["stimulus_path"])
             fig.suptitle(header, fontsize=16)
             fig.savefig(self.figures_dir / f"{header}.png")
             plt.close()
+
+    def add_stimulus(self, fig: matplotlib.figure.Figure, stim_path: Path):
+        """
+        Add stimulus to a figure
+        Arguments:
+            fig {matplotlib.figure.Figure} -- [description]
+        Returns:
+            [type] -- [description]
+        """
+        stim_path = Path(stim_path)
+        if stim_path.suffix == ".mp4":
+            vidcap = cv2.VideoCapture(str(stim_path))
+            success, image = vidcap.read()
+        else:
+            image = plt.imread(get_sample_data(stim_path))
+        newax = fig.add_axes([0.38, 0, 0.2, 0.4], zorder=-1)
+        newax.imshow(image)
+        newax.axis("off")
+        return fig
 
     def generate_stim_figure(self, df: pd.DataFrame):
         """

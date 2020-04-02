@@ -1,7 +1,8 @@
 from enum import Enum
 from pathlib import Path
 
-CURRENT_DIR = Path(__file__).parent.absolute()
+CURRENT_DIR = Path(__file__).parent.parent.absolute()
+CURRENT_DIR = CURRENT_DIR / "stimuli"
 
 
 class Stimuli(Enum):
